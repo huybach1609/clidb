@@ -2,9 +2,12 @@
 @import "@heroui/styles";
 @import "../styles/themes/obsidians.css";
 @import "@fontsource/inter";
+@import "@fontsource/jetbrains-mono";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", "Courier New", monospace;
 }
 
 .logo.vite:hover {

@@ -1,0 +1,11 @@
+{
+  "errors": {
+    "unknown": "Đã xảy ra lỗi.",
+    "saveCli": {
+      "appDataDir": "Không lấy được thư mục dữ liệu ứng dụng.",
+      "createDir": "Không tạo được thư mục lưu trữ.",
+      "serialize": "Không chuẩn bị được dữ liệu để lưu.",
+      "writeFile": "Không ghi được file dữ liệu."
+    }
+  }
+}
