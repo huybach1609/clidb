@@ -1,0 +1,11 @@
+# Cargo: binaries and build artifacts
+/target/
+
+# Tauri: capability schema (generated for IDE hints)
+/gen/schemas
+
+# Rust incremental / backup
+**/*.rs.bk
+
+# Windows debug symbols (optional local builds)
+*.pdb
