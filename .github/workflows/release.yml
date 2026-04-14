@@ -54,7 +54,7 @@ jobs:
           releaseBody: "See the assets below to download this version."
           releaseDraft: false
           prerelease: false
-          args: --bundles appimage,deb,rpm,pacman 
+          args: --bundles appimage,deb
 
       - name: Build and publish Tauri app (non-Linux)
         if: matrix.platform != 'ubuntu-22.04'
