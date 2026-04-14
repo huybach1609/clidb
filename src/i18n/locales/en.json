@@ -1,11 +1,93 @@
 {
+  "app": {
+    "title": "Commands",
+    "emptyCommands": "No commands found",
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "close": "Close",
+      "cancel": "Cancel",
+      "execute": "Execute",
+      "running": "Running",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "about": {
+      "title": "About",
+      "productName": "clidb",
+      "versionLabel": "Version {{version}}",
+      "blurb": "CLI command library for your desktop.",
+      "github": "GitHub",
+      "altLogo": "Application icon"
+    },
+    "preferences": {
+      "languageMenu": "Language",
+      "languageEnglish": "English",
+      "languageVietnamese": "Tiếng Việt",
+      "useLightTheme": "Use light theme",
+      "useDarkTheme": "Use dark theme"
+    },
+    "list": {
+      "openActionsFor": "Open actions for {{name}}",
+      "progressAriaLabel": "Running command {{name}}"
+    },
+    "output": {
+      "title": "Command output",
+      "status": {
+        "running": "Running...",
+        "failed": "Failed",
+        "finished": "Finished"
+      },
+      "stderrLines": "stderr lines: {{count}}",
+      "exitCode": " | exit code: {{code}}",
+      "waiting": "Waiting for output..."
+    },
+    "form": {
+      "title": {
+        "create": "Create command",
+        "update": "Update command"
+      },
+      "sections": {
+        "advanced": "Advanced"
+      },
+      "fields": {
+        "name": "Name",
+        "command": "Command",
+        "requiresRoot": "Requires root",
+        "envs": "Environment variables"
+      },
+      "placeholders": {
+        "name": "Command name",
+        "command": "Command",
+        "envs": "KEY=VALUE\nExample:\nAPP_MODE=dev\nAPI_URL=https://example.com"
+      },
+      "helpers": {
+        "name": "A short label to identify this command in the list.",
+        "command": "Enter the exact shell command you want to execute.",
+        "envs": "One variable per line, format KEY=VALUE."
+      },
+      "validation": {
+        "nameRequired": "Name is required.",
+        "commandRequired": "Command is required.",
+        "fixHighlighted": "Please fix the highlighted fields.",
+        "envLineInvalid": "Env line {{line}} is invalid. Use KEY=VALUE format.",
+        "envKeyInvalid": "Invalid environment variable name at line {{line}}: {{key}}",
+        "envRestricted": "Cannot override system environment variable: {{key}}"
+      }
+    }
+  },
   "errors": {
     "unknown": "Something went wrong.",
     "saveCli": {
       "appDataDir": "Could not resolve the application data folder.",
       "createDir": "Could not create the storage folder.",
+      "readFile": "Could not read the data file.",
+      "deserialize": "Could not parse the data file.",
       "serialize": "Could not prepare data for saving.",
-      "writeFile": "Could not write the data file."
+      "writeFile": "Could not write the data file.",
+      "commandNotFound": "Command was not found.",
+      "executeCommand": "Could not execute command.",
+      "restrictedEnv": "Cannot override protected system environment variables."
     }
   }
 }

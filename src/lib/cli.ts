@@ -26,7 +26,6 @@ export async function deleteCommand(id: string) {
   await invoke("delete_command", { id });
 }
 // Execute
-export async function executeCommand(id: string): Promise<string> {
-  const output = await invoke("execute_command", { id });
-  return output as string;
+export async function executeCommand(id: string): Promise<void> {
+  await invoke("execute_command", { id });
 }

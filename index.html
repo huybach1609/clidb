@@ -17,6 +17,16 @@
         document.documentElement.classList.toggle("dark", t === "dark");
       })();
     </script>
+    <script>
+      (function () {
+        try {
+          var v = localStorage.getItem("clidb-lang:v1");
+          if (v === "en" || v === "vi") {
+            document.documentElement.lang = v;
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

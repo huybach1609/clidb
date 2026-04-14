@@ -1,4 +1,5 @@
 
+import { ScrollShadow } from "@heroui/react";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -89,7 +90,7 @@ function AppModalRoot({
           aria-labelledby={titleId}
           aria-modal="true"
           className={clsx(
-            "fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center",
+            "fixed inset-0 z-100 flex items-end justify-center p-4 sm:items-center",
             className,
           )}
           exit={{ opacity: 0 }}
@@ -145,7 +146,7 @@ function AppModalPanel({ className, children, ref }: AppModalPanelProps) {
       ref={ref}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       className={clsx(
-        "relative z-1 outline-none rounded-(--radius-outline) p-3",
+        "relative z-1 flex w-full max-h-[min(90vh,44rem)] flex-col overflow-hidden rounded-(--radius-outline) outline-none",
         className,
       )}
       exit={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -157,15 +158,47 @@ function AppModalPanel({ className, children, ref }: AppModalPanelProps) {
   );
 }
 
-type AppModalTitleProps = {
-  children: ReactNode;
+type AppModalBodyProps = {
+  className?: string;
+  children?: ReactNode;
 };
 
-function AppModalTitle({ children }: AppModalTitleProps) {
+function AppModalBody({ className, children }: AppModalBodyProps) {
+  return (
+    <ScrollShadow className={clsx("min-h-0 flex-1 overflow-y-auto", className)}>
+      {children}
+    </ScrollShadow>
+  );
+}
+
+type AppModalFooterProps = {
+  className?: string;
+  children?: ReactNode;
+};
+
+function AppModalFooter({ className, children }: AppModalFooterProps) {
+  return (
+    <div
+      className={clsx(
+        "pt-3 flex items-center justify-end gap-2 border-t border-default-200 ",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+type AppModalTitleProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+function AppModalTitle({ children, className }: AppModalTitleProps) {
   const { titleId } = useAppModalContext();
 
   return (
-    <h2 className="sr-only" id={titleId}>
+    <h2 className={clsx("sr-only", className)} id={titleId}>
       {children}
     </h2>
   );
@@ -175,5 +208,7 @@ export const AppModal = {
   Root: AppModalRoot,
   Backdrop: AppModalBackdrop,
   Panel: AppModalPanel,
+  Body: AppModalBody,
+  Footer: AppModalFooter,
   Title: AppModalTitle,
 };

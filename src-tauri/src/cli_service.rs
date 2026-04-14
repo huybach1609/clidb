@@ -1,11 +1,11 @@
 use crate::ipc_error::IpcError;
-use std::process::Stdio;
-use std::{collections::HashMap, process::Command};
 use serde::{Deserialize, Serialize};
-use std::{ fs, path::PathBuf};
-use tauri::{AppHandle, Emitter, Manager};
 use std::io::{BufRead, BufReader};
+use std::process::Stdio;
 use std::thread;
+use std::{collections::HashMap, process::Command};
+use std::{fs, path::PathBuf};
+use tauri::{AppHandle, Emitter, Manager};
 
 // định nghĩa cấu trúc dữ liệu mapping chính xác với object từ frontend
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -23,6 +23,14 @@ pub struct CliCommand {
 pub struct CommandLog {
     pub id: String,
     pub text: String,
+    pub stream: String,
+}
+
+#[derive(Clone, Serialize)]
+pub struct CommandFinished {
+    pub id: String,
+    pub success: bool,
+    pub exit_code: Option<i32>,
 }
 
 // Danh sách các biến môi trường hệ thống không cho phép ghi đè từ user-defined envs
@@ -33,13 +41,12 @@ fn validate_envs(envs: &HashMap<String, String>) -> Result<(), IpcError> {
         if RESTRICTED_ENVS.contains(&key.as_str()) {
             return Err(IpcError::new(
                 "errors.saveCli.restrictedEnv",
-                Some(format!("Không được phép ghi đè biến hệ thống: {key}")),
+                Some(format!("Cannot override protected system variable: {key}")),
             ));
         }
     }
     Ok(())
 }
-
 
 fn get_file_path(app_handle: &AppHandle) -> Result<PathBuf, IpcError> {
     let dir = app_handle
@@ -48,19 +55,19 @@ fn get_file_path(app_handle: &AppHandle) -> Result<PathBuf, IpcError> {
         .map_err(|e| IpcError::new("errors.saveCli.appDataDir", Some(e.to_string())))?
         .join("clidb");
 
-    fs::create_dir_all(&dir).map_err(|e| {
-        IpcError::new("errors.saveCli.createDir", Some(e.to_string()))
-    })?;
+    fs::create_dir_all(&dir)
+        .map_err(|e| IpcError::new("errors.saveCli.createDir", Some(e.to_string())))?;
     Ok(dir.join("data.json"))
 }
-fn read_db (app_handle: &AppHandle) -> Result<Vec<CliCommand>, IpcError> {
+fn read_db(app_handle: &AppHandle) -> Result<Vec<CliCommand>, IpcError> {
     let path = get_file_path(app_handle)?;
 
     if !path.exists() {
         return Ok(Vec::new());
     }
 
-    let content = fs::read_to_string(&path).map_err(|e| IpcError::new("errors.saveCli.readFile", Some(e.to_string())))?;
+    let content = fs::read_to_string(&path)
+        .map_err(|e| IpcError::new("errors.saveCli.readFile", Some(e.to_string())))?;
     if content.trim().is_empty() {
         return Ok(Vec::new());
     }
@@ -80,10 +87,12 @@ fn read_db (app_handle: &AppHandle) -> Result<Vec<CliCommand>, IpcError> {
         }
     }
 }
-fn write_db (app_handle: &AppHandle, data: Vec<CliCommand>) -> Result<(), IpcError> {
+fn write_db(app_handle: &AppHandle, data: Vec<CliCommand>) -> Result<(), IpcError> {
     let path = get_file_path(app_handle)?;
-    let json_string = serde_json::to_string_pretty(&data).map_err(|e| IpcError::new("errors.saveCli.serialize", Some(e.to_string())))?;
-    fs::write(&path, json_string).map_err(|e| IpcError::new("errors.saveCli.writeFile", Some(e.to_string())))?;
+    let json_string = serde_json::to_string_pretty(&data)
+        .map_err(|e| IpcError::new("errors.saveCli.serialize", Some(e.to_string())))?;
+    fs::write(&path, json_string)
+        .map_err(|e| IpcError::new("errors.saveCli.writeFile", Some(e.to_string())))?;
     Ok(())
 }
 fn get_command_by_id(app_handle: &AppHandle, id: String) -> Result<CliCommand, IpcError> {
@@ -115,7 +124,10 @@ pub fn create_command(app_handle: AppHandle, data: CliCommand) -> Result<(), Ipc
 pub fn update_command(app_handle: AppHandle, data: CliCommand) -> Result<(), IpcError> {
     validate_envs(&data.envs)?;
     let mut db = read_db(&app_handle)?;
-    let index = db.iter().position(|c| c.id == data.id).ok_or(IpcError::new("errors.saveCli.commandNotFound", None))?;
+    let index = db
+        .iter()
+        .position(|c| c.id == data.id)
+        .ok_or(IpcError::new("errors.saveCli.commandNotFound", None))?;
     db[index] = data;
     write_db(&app_handle, db)
 }
@@ -128,12 +140,11 @@ pub fn delete_command(app_handle: AppHandle, id: String) -> Result<(), IpcError>
     write_db(&app_handle, db)
 }
 
-
 // #[tauri::command]
 // pub fn execute_command(app_handle: AppHandle, id: String) -> Result<String, IpcError> {
 //     // 1. Lấy command by id
 //     let command = get_command_by_id(&app_handle, id)?;
-    
+
 //     // Tự động loại bỏ chữ "sudo " ở đầu nếu người dùng lỡ nhập sai trên UI
 //     let mut cmd_str = command.command.trim().to_string();
 //     if cmd_str.starts_with("sudo ") {
@@ -207,17 +218,29 @@ pub fn delete_command(app_handle: AppHandle, id: String) -> Result<(), IpcError>
 pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError> {
     // 1. Lấy command by id và làm sạch chuỗi
     let command = get_command_by_id(&app_handle, id.clone())?;
-    
+
     let mut cmd_str = command.command.trim().to_string();
     if cmd_str.starts_with("sudo ") {
-        cmd_str = cmd_str.strip_prefix("sudo ").unwrap_or(&cmd_str).to_string();
+        cmd_str = cmd_str
+            .strip_prefix("sudo ")
+            .unwrap_or(&cmd_str)
+            .to_string();
     }
 
     // 2. Thiết lập builder cho Command thay vì chạy ngay
     let mut process = if cfg!(target_os = "windows") {
         if command.requires_root {
             let mut p = Command::new("powershell");
-            p.args(["-Command", "Start-Process", "cmd", "-ArgumentList", &format!("'/c {}'", cmd_str), "-Verb", "RunAs", "-Wait"]);
+            p.args([
+                "-Command",
+                "Start-Process",
+                "cmd",
+                "-ArgumentList",
+                &format!("'/c {}'", cmd_str),
+                "-Verb",
+                "RunAs",
+                "-Wait",
+            ]);
             p.envs(&command.envs);
             p
         } else {
@@ -228,7 +251,10 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
         }
     } else if cfg!(target_os = "macos") {
         if command.requires_root {
-            let apple_script = format!("do shell script \"{}\" with administrator privileges", cmd_str);
+            let apple_script = format!(
+                "do shell script \"{}\" with administrator privileges",
+                cmd_str
+            );
             let mut p = Command::new("osascript");
             p.args(["-e", &apple_script]);
             p.envs(&command.envs);
@@ -266,9 +292,9 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
     process.stderr(Stdio::piped());
 
     // 4. Khởi chạy tiến trình (không block)
-    let mut child = process.spawn().map_err(|e| {
-        IpcError::new("errors.saveCli.executeCommand", Some(e.to_string()))
-    })?;
+    let mut child = process
+        .spawn()
+        .map_err(|e| IpcError::new("errors.saveCli.executeCommand", Some(e.to_string())))?;
 
     // Lấy các đường ống dữ liệu ra khỏi tiến trình con
     let stdout = child.stdout.take();
@@ -279,9 +305,9 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
 
     // 5. Đẩy việc đọc dữ liệu vào một Thread riêng để không làm treo Tauri
     thread::spawn(move || {
-        // Sử dụng scoped thread hoặc các thread phụ để tránh tình trạng deadlock 
+        // Sử dụng scoped thread hoặc các thread phụ để tránh tình trạng deadlock
         // khi stdout và stderr bị đầy bộ đệm (pipe buffer).
-        
+
         // Đọc Stdout
         let app_out = app_clone.clone();
         let id_out = id_clone.clone();
@@ -289,7 +315,14 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
             if let Some(out) = stdout {
                 let reader = BufReader::new(out);
                 for line in reader.lines().flatten() {
-                    let _ = app_out.emit("command-log", CommandLog { id: id_out.clone(), text: line });
+                    let _ = app_out.emit(
+                        "command-log",
+                        CommandLog {
+                            id: id_out.clone(),
+                            text: line,
+                            stream: "stdout".to_string(),
+                        },
+                    );
                 }
             }
         });
@@ -301,7 +334,14 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
             if let Some(err) = stderr {
                 let reader = BufReader::new(err);
                 for line in reader.lines().flatten() {
-                    let _ = app_err.emit("command-log", CommandLog { id: id_err.clone(), text: format!("ERROR: {}", line) });
+                    let _ = app_err.emit(
+                        "command-log",
+                        CommandLog {
+                            id: id_err.clone(),
+                            text: line,
+                            stream: "stderr".to_string(),
+                        },
+                    );
                 }
             }
         });
@@ -311,10 +351,21 @@ pub fn execute_command(app_handle: AppHandle, id: String) -> Result<(), IpcError
         let _ = err_thread.join();
 
         // Chờ tiến trình gốc kết thúc để dọn dẹp bộ nhớ
-        let _ = child.wait();
+        let finished_payload = match child.wait() {
+            Ok(status) => CommandFinished {
+                id: id_clone,
+                success: status.success(),
+                exit_code: status.code(),
+            },
+            Err(_) => CommandFinished {
+                id: id_clone,
+                success: false,
+                exit_code: None,
+            },
+        };
 
         // Báo hiệu cho React biết lệnh đã chạy xong
-        let _ = app_clone.emit("command-finished", id_clone);
+        let _ = app_clone.emit("command-finished", finished_payload);
     });
 
     Ok(())

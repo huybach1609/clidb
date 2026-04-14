@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { ensureNativeAppMenu, syncNativeMenuDarkMode } from "../lib/tauri/nativeAppMenu";
 
 const STORAGE_KEY = "clidb-theme";
 
@@ -56,19 +55,6 @@ export function useTheme() {
   const toggleTheme = useCallback(() => {
     setThemeState((t) => (t === "dark" ? "light" : "dark"));
   }, []);
-
-  const toggleThemeRef = useRef(toggleTheme);
-  toggleThemeRef.current = toggleTheme;
-
-  useEffect(() => {
-    void ensureNativeAppMenu(resolveInitialTheme() === "dark", () => {
-      toggleThemeRef.current();
-    });
-  }, []);
-
-  useEffect(() => {
-    void syncNativeMenuDarkMode(theme === "dark");
-  }, [theme]);
 
   return { theme, setTheme, toggleTheme };
 }
