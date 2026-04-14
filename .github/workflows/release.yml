@@ -43,7 +43,7 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev
 
-      - name: Build and publish Tauri app (AppImage on Linux)
+      - name: Build and publish Tauri app (AppImage + DEB on Linux)
         if: matrix.platform == 'ubuntu-22.04'
         uses: tauri-apps/tauri-action@v0
         env:
@@ -54,7 +54,7 @@ jobs:
           releaseBody: "See the assets below to download this version."
           releaseDraft: false
           prerelease: false
-          args: --bundles appimage
+          args: --bundles appimage,deb,rpm,pacman 
 
       - name: Build and publish Tauri app (non-Linux)
         if: matrix.platform != 'ubuntu-22.04'

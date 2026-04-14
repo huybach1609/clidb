@@ -76,9 +76,13 @@ fn build_native_menu(
     )?;
 
     #[cfg(target_os = "macos")]
+    let fullscreen_item = PredefinedMenuItem::fullscreen(app, None)?;
+    #[cfg(target_os = "macos")]
+    let separator_item = PredefinedMenuItem::separator(app)?;
+    #[cfg(target_os = "macos")]
     let view_items: Vec<&dyn tauri::menu::IsMenuItem<Wry>> = vec![
-        &PredefinedMenuItem::fullscreen(app, None)?,
-        &PredefinedMenuItem::separator(app)?,
+        &fullscreen_item,
+        &separator_item,
         dark_mode,
     ];
     #[cfg(target_os = "macos")]
