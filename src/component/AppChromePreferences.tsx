@@ -40,17 +40,15 @@ export const AppChromePreferences = memo(function AppChromePreferences({
   return (
     <div className="flex shrink-0 items-center gap-1 sm:gap-2">
       <Dropdown>
-        <Dropdown.Trigger>
-          <Button
-            size="sm"
-            variant="tertiary"
-            isIconOnly
-            className="min-h-10 min-w-10"
-            aria-label={t("app.preferences.languageMenu")}
-          >
-            <Languages className="size-4" />
-          </Button>
-        </Dropdown.Trigger>
+        <Button
+          size="sm"
+          variant="tertiary"
+          isIconOnly
+          className="min-h-10 min-w-10"
+          aria-label={t("app.preferences.languageMenu")}
+        >
+          <Languages className="size-4" />
+        </Button>
         <Dropdown.Popover className="rounded-(--radius-outline)">
           <Dropdown.Menu
             aria-label={t("app.preferences.languageMenu")}

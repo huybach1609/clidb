@@ -269,10 +269,11 @@ export function CommandFormModal({
                           <Label className="text-sm">
                             {t("app.form.fields.requiresRoot")}
                           </Label>
+                          <Switch.Control>
+                            <Switch.Thumb />
+                          </Switch.Control>
                         </Switch.Content>
-                        <Switch.Control>
-                          <Switch.Thumb />
-                        </Switch.Control>
+
                       </Switch>
                       <div className="flex flex-col gap-2">
                         <Label htmlFor="command-envs">
