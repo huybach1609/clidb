@@ -26,7 +26,7 @@ sha256sums=('821e6d01cb7fbbbe070f403753166bfde664f107d7925af14aa9639ae0de089c')
 build() {
   cd "$pkgname-$pkgver"
   bun install --frozen-lockfile
-  bun tauri build
+  bun tauri build --no-bundle
 }
 
 package() {
