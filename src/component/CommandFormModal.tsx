@@ -1,17 +1,18 @@
-import type { Key } from "react-aria-components";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import {
   Accordion,
-  Button,
-  Input,
-  Label,
-  Separator,
-  Switch,
-  TextArea,
-} from "@heroui/react";
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { AppModal } from "@/component/AppModal";
 import type { CliCommand } from "@/lib/cli";
-import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const RESTRICTED_ENVS = new Set(["PATH", "HOME", "USER", "PWD", "SHELL"]);
@@ -155,20 +156,23 @@ export function CommandFormModal({
 
   return (
     <AppModal.Root isOpen={isOpen} onClose={onClose} closeOnBackdropClick>
-      <AppModal.Backdrop className="bg-black/50 backdrop-blur-[1px]" />
-      <AppModal.Panel className="w-full max-w-md bg-background border border-default-200 shadow-medium ">
-        <AppModal.Title>{title}</AppModal.Title>
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <h2 className="text-lg font-semibold pt-3 pl-3">{title}</h2>
+      <AppModal.Backdrop />
+      <AppModal.Panel className="w-full max-w-md">
+        <AppModal.Header onClose={onClose}>
+          <AppModal.Title>{title}</AppModal.Title>
+        </AppModal.Header>
+        <div className="flex min-h-0 flex-1 flex-col">
           {errorMessage ? (
-            <p aria-live="polite" className="text-danger text-sm">
+            <p aria-live="polite" className="text-destructive text-xs font-medium px-5 pt-3">
               {errorMessage}
             </p>
           ) : null}
-          <AppModal.Body className="pr-1">
-            <div className="flex flex-col gap-4 p-3">
+          <AppModal.Body>
+            <div className="flex flex-col gap-4 p-5">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="command-name">{t("app.form.fields.name")}</Label>
+                <Label htmlFor="command-name" className="text-xs font-medium">
+                  {t("app.form.fields.name")}
+                </Label>
                 <Input
                   id="command-name"
                   type="text"
@@ -189,12 +193,12 @@ export function CommandFormModal({
                   }}
                 />
                 {fieldErrors.name ? (
-                  <p className="text-danger text-xs" id="command-name-error">
+                  <p className="text-destructive text-xs" id="command-name-error">
                     {fieldErrors.name}
                   </p>
                 ) : (
                   <p
-                    className="text-default-500 text-xs"
+                    className="text-muted-foreground text-xs"
                     id="command-name-helper"
                   >
                     {t("app.form.helpers.name")}
@@ -202,8 +206,10 @@ export function CommandFormModal({
                 )}
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="command-input">{t("app.form.fields.command")}</Label>
-                <TextArea
+                <Label htmlFor="command-input" className="text-xs font-medium">
+                  {t("app.form.fields.command")}
+                </Label>
+                <Textarea
                   id="command-input"
                   aria-describedby={
                     fieldErrors.command
@@ -211,8 +217,8 @@ export function CommandFormModal({
                       : "command-input-help"
                   }
                   aria-invalid={Boolean(fieldErrors.command)}
-                  rows={5}
-                  className="font-mono text-sm"
+                  rows={4}
+                  className="font-mono text-xs leading-relaxed"
                   placeholder={t("app.form.placeholders.command")}
                   value={draftCommand.command}
                   onChange={(e) => {
@@ -224,63 +230,51 @@ export function CommandFormModal({
                   }}
                 />
                 {fieldErrors.command ? (
-                  <p className="text-danger text-xs" id="command-input-error">
+                  <p className="text-destructive text-xs" id="command-input-error">
                     {fieldErrors.command}
                   </p>
                 ) : (
                   <p
-                    className="text-default-500 text-xs"
+                    className="text-muted-foreground text-xs"
                     id="command-input-help"
                   >
                     {t("app.form.helpers.command")}
                   </p>
                 )}
               </div>
-              <Separator variant="default" />
+              <Separator />
 
               <Accordion
-                variant="surface"
-                expandedKeys={isAdvancedOpen ? new Set<Key>(["root"]) : new Set()}
-                onExpandedChange={(keys) =>
-                  setIsAdvancedOpen(keys.has("root"))
-                }
+                value={isAdvancedOpen ? ["advanced"] : []}
+                onValueChange={(val) => setIsAdvancedOpen(val.includes("advanced"))}
               >
-                <Accordion.Item id="root">
-                  <Accordion.Heading>
-                    <Accordion.Trigger>
-                      {t("app.form.sections.advanced")}
-                      <Accordion.Indicator>
-                        <ChevronDown />
-                      </Accordion.Indicator>
-                    </Accordion.Trigger>
-                  </Accordion.Heading>
-                  <Accordion.Panel>
-                    <div className="mt-3 flex flex-col gap-3 px-3 pb-5">
-                      <Switch
-                        isSelected={draftCommand.requires_root}
-                        onChange={(checked: boolean) =>
-                          setDraftCommand((prev) => ({
-                            ...prev,
-                            requires_root: checked,
-                          }))
-                        }
-                      >
-                        <Switch.Content>
-                          <Label className="text-sm">
-                            {t("app.form.fields.requiresRoot")}
-                          </Label>
-                          <Switch.Control>
-                            <Switch.Thumb />
-                          </Switch.Control>
-                        </Switch.Content>
-
-                      </Switch>
+                <AccordionItem value="advanced" className="border-none">
+                  <AccordionTrigger className="text-xs font-medium py-1.5 hover:no-underline text-muted-foreground hover:text-foreground">
+                    {t("app.form.sections.advanced")}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="mt-2.5 flex flex-col gap-3.5 px-0.5 pb-1">
+                      <div className="flex items-center gap-2.5 rounded-lg border border-border/50 bg-muted/30 p-2.5">
+                        <Switch
+                          id="requires-root"
+                          checked={draftCommand.requires_root}
+                          onCheckedChange={(checked) =>
+                            setDraftCommand((prev) => ({
+                              ...prev,
+                              requires_root: checked,
+                            }))
+                          }
+                        />
+                        <Label htmlFor="requires-root" className="text-xs cursor-pointer select-none font-medium">
+                          {t("app.form.fields.requiresRoot")}
+                        </Label>
+                      </div>
                       <div className="flex flex-col gap-2">
-                        <Label htmlFor="command-envs">
+                        <Label htmlFor="command-envs" className="text-xs font-medium">
                           {t("app.form.fields.envs")}
                         </Label>
-                        <TextArea
-                          rows={5}
+                        <Textarea
+                          rows={4}
                           id="command-envs"
                           aria-describedby={
                             fieldErrors.envs
@@ -288,7 +282,7 @@ export function CommandFormModal({
                               : "command-envs-help"
                           }
                           aria-invalid={Boolean(fieldErrors.envs)}
-                          className="font-mono"
+                          className="font-mono text-xs leading-relaxed"
                           placeholder={t("app.form.placeholders.envs")}
                           value={envInput}
                           onChange={(e) => {
@@ -301,14 +295,14 @@ export function CommandFormModal({
                         />
                         {fieldErrors.envs ? (
                           <p
-                            className="text-danger text-xs"
+                            className="text-destructive text-xs"
                             id="command-envs-error"
                           >
                             {fieldErrors.envs}
                           </p>
                         ) : (
                           <p
-                            className="text-default-500 text-xs"
+                            className="text-muted-foreground text-xs"
                             id="command-envs-help"
                           >
                             {t("app.form.helpers.envs")}
@@ -316,20 +310,21 @@ export function CommandFormModal({
                         )}
                       </div>
                     </div>
-                  </Accordion.Panel>
-                </Accordion.Item>
+                  </AccordionContent>
+                </AccordionItem>
               </Accordion>
             </div>
           </AppModal.Body>
-          <AppModal.Footer className="px-3 pb-3">
+          <AppModal.Footer>
             <Button
-              variant="tertiary"
+              size="sm"
+              variant="outline"
               onClick={onClose}
-              isDisabled={isSubmitting}
+              disabled={isSubmitting}
             >
               {t("app.actions.cancel")}
             </Button>
-            <Button onClick={handleSave} isDisabled={isSubmitting}>
+            <Button size="sm" onClick={handleSave} disabled={isSubmitting}>
               {draftCommand.id ? t("app.actions.update") : t("app.actions.create")}
             </Button>
           </AppModal.Footer>

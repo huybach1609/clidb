@@ -1,4 +1,4 @@
-import { Button } from "@heroui/react";
+import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import appIcon from "@/assets/app-icon.png";
@@ -46,10 +46,10 @@ export function AboutModal({ isOpen, onClose }: AboutModalProps) {
           </div>
         </AppModal.Body>
         <AppModal.Footer className="border-t-0 px-4 pb-4">
-          <Button size="sm" variant="tertiary" onClick={onClose}>
+          <Button size="sm" variant="outline" onClick={onClose}>
             {t("app.actions.close")}
           </Button>
-          <Button size="sm" variant="primary" onClick={openGithub}>
+          <Button size="sm" variant="default" onClick={openGithub}>
             {t("app.about.github")}
           </Button>
         </AppModal.Footer>

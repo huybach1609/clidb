@@ -1,13 +1,16 @@
 import "./App.css";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@heroui/react";
-import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, Loader2, Plus, Terminal, XCircle } from "lucide-react";
+import appIcon from "@/assets/app-icon.png";
 import { AboutModal } from "@/component/AboutModal";
 import { AppChromePreferences } from "@/component/AppChromePreferences";
 import { CommandFormModal } from "@/component/CommandFormModal";
 import { CommandList, type CommandAction } from "@/component/CommandList";
 import { AppModal } from "@/component/AppModal";
+import { WindowControls } from "@/component/WindowControls";
 import {
   CommandPageProvider,
   useCommandPageContext,
@@ -17,6 +20,8 @@ import { useCommandExecutionStream } from "@/app/useCommandExecutionStream";
 import { useNativeMenuBridge } from "@/hooks/useNativeMenuBridge";
 import { useTheme } from "@/hooks/useTheme";
 import type { CliCommand } from "@/lib/cli";
+
+import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export function CommandPage() {
   const { t } = useTranslation();
@@ -140,7 +145,7 @@ export function CommandPage() {
 
 function CommandPageBody() {
   const { t } = useTranslation();
-  const { state, actions, meta } = useCommandPageContext();
+  const { state, actions } = useCommandPageContext();
   const activeExitCode = state.activeLogResult?.exitCode;
   const { theme, setTheme, toggleTheme } = useTheme();
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -152,26 +157,71 @@ function CommandPageBody() {
     onToggleDarkMode: toggleTheme,
   });
 
+  const handleStartDrag = useCallback((e: React.MouseEvent) => {
+    if (e.button === 0) {
+      try {
+        void getCurrentWindow().startDragging();
+      } catch {
+        /* not in tauri */
+      }
+    }
+  }, []);
+
   return (
-    <main className="flex h-svh min-h-0 flex-col bg-background text-foreground">
-      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 px-4 py-6 sm:px-6 lg:max-w-3xl lg:gap-4 lg:py-8">
+    <main className="flex h-svh min-h-0 flex-col bg-background text-foreground select-none">
+      {/* Sleek Frameless Titlebar Header */}
+      <header className="flex shrink-0 h-10 items-center justify-between px-3 border-b border-border/50 bg-card/70 backdrop-blur-md select-none">
+        {/* Left Drag Region: Logo, Title, Badge */}
+        <div
+          data-tauri-drag-region
+          onMouseDown={handleStartDrag}
+          className="flex items-center gap-2 min-w-0 cursor-default select-none py-1 pr-2"
+        >
+          <img
+            src={appIcon}
+            alt="clidb logo"
+            className="size-4.5 rounded-sm shrink-0 pointer-events-none"
+          />
+          <span className="font-bold text-xs tracking-tight text-foreground pointer-events-none">
+            {t("app.title")}
+          </span>
+          <Badge variant="secondary" className="font-mono text-[10px] px-1.5 py-0 rounded-full border border-border/50 text-muted-foreground pointer-events-none">
+            {state.commands.length}
+          </Badge>
+        </div>
+
+        {/* Middle Flexible Drag Area */}
+        <div
+          data-tauri-drag-region
+          onMouseDown={handleStartDrag}
+          className="flex-1 h-full cursor-default"
+        />
+
+        {/* Right Non-Drag Interactive Area: Preferences, Create Button, Window Controls */}
+        <div className="flex items-center gap-1.5 shrink-0 z-10">
+          <div className="">
+            <AppChromePreferences theme={theme} onThemeChange={setTheme} />
+          </div>
+          <Button
+            size="sm"
+            variant="default"
+            onClick={actions.openCreateModal}
+            className="gap-1 shadow-xs font-medium px-2.5 h-7 text-xs rounded-md"
+          >
+            <Plus className="size-3.5 shrink-0" />
+            {t("app.actions.create")}
+          </Button>
+          <WindowControls />
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 px-4 py-4 sm:px-6 lg:max-w-3xl lg:gap-4 lg:py-6">
         {state.errorMessage ? (
-          <p className="shrink-0 text-danger" role="alert">
+          <p className="shrink-0 text-destructive text-sm font-medium" role="alert">
             {state.errorMessage}
           </p>
         ) : null}
-        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
-            {t("app.title")}
-          </h1>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:flex-initial sm:gap-3">
-            <AppChromePreferences theme={theme} onThemeChange={setTheme} />
-            <Button size="sm" variant="tertiary" onClick={actions.openCreateModal}>
-              <Plus className="size-4 shrink-0" />
-              {t("app.actions.create")}
-            </Button>
-          </div>
-        </header>
         {state.commands.length > 0 ? (
           <CommandList
             commands={state.commands}
@@ -198,50 +248,78 @@ function CommandPageBody() {
         onClose={actions.closeLogModal}
         closeOnBackdropClick
       >
-        <AppModal.Backdrop className="bg-black/50 backdrop-blur-[1px]" />
-        <AppModal.Panel className="w-full max-w-2xl bg-background border border-default-200 shadow-medium">
-          <AppModal.Title className="p-3">{t("app.output.title")}</AppModal.Title>
-          <div className="mb-3 flex items-center justify-between gap-3 px-3 pt-3">
-            <div className="min-w-0">
-              <p className="font-semibold truncate">
-                {state.activeLogCommand?.name ?? t("app.output.title")}
-              </p>
-              <p className="text-xs text-default-500">{meta.activeStatusText}</p>
-              <p className="text-xs text-default-500">
-                {t("app.output.stderrLines", { count: state.activeStderrCount })}
-                {!state.isActiveCommandRunning && activeExitCode != null
-                  ? t("app.output.exitCode", { code: activeExitCode })
-                  : ""}
-              </p>
+        <AppModal.Backdrop />
+        <AppModal.Panel className="w-full max-w-2xl">
+          <AppModal.Header onClose={actions.closeLogModal}>
+            <div className="flex items-center justify-between gap-3 pr-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Terminal className="size-5 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base tracking-tight truncate text-foreground">
+                    {state.activeLogCommand?.name ?? t("app.output.title")}
+                  </h3>
+                  <p className="font-mono text-[11px] text-muted-foreground/80 truncate">
+                    {state.activeLogCommand?.command}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {state.isActiveCommandRunning ? (
+                  <Badge variant="default" className="bg-blue-600 dark:bg-blue-500 text-white gap-1.5 px-2 py-0.5 text-xs font-semibold animate-pulse">
+                    <Loader2 className="size-3 animate-spin" />
+                    {t("app.output.status.running")}
+                  </Badge>
+                ) : activeExitCode === 0 ? (
+                  <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 gap-1 px-2 py-0.5 text-xs font-semibold">
+                    <CheckCircle2 className="size-3" />
+                    {t("app.output.status.finished")}
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="gap-1 px-2 py-0.5 text-xs font-semibold">
+                    <XCircle className="size-3" />
+                    {t("app.output.status.failed")}
+                  </Badge>
+                )}
+                {activeExitCode != null && !state.isActiveCommandRunning ? (
+                  <Badge variant="outline" className="font-mono text-[11px] text-muted-foreground">
+                    exit: {activeExitCode}
+                  </Badge>
+                ) : null}
+              </div>
             </div>
-          </div>
-          <AppModal.Body>
-            <div className="h-[320px] overflow-auto rounded-medium border border-default-200 bg-content2 p-3">
+          </AppModal.Header>
+          <AppModal.Body className="p-4 bg-zinc-950/90 dark:bg-zinc-950">
+            <div className="h-[340px] overflow-auto rounded-xl border border-zinc-800/80 bg-zinc-950 p-4 font-mono text-xs shadow-inner">
               {state.activeLogs.length > 0 ? (
-                <pre className="font-mono text-xs whitespace-pre-wrap wrap-break-word">
+                <div className="space-y-1">
                   {state.activeLogs.map((entry, index) => (
-                    <span
+                    <div
                       key={`${entry.stream}-${index}`}
-                      className={
+                      className={`leading-relaxed break-all ${
                         entry.stream === "stderr"
-                          ? "text-warning-600 dark:text-warning-400"
-                          : "text-foreground"
-                      }
+                          ? "text-rose-400 font-medium"
+                          : "text-zinc-200"
+                      }`}
                     >
+                      <span className="select-none text-zinc-600 mr-2">$</span>
                       {entry.text}
-                      {"\n"}
-                    </span>
+                    </div>
                   ))}
-                </pre>
+                </div>
+              ) : state.isActiveCommandRunning ? (
+                <div className="flex h-full flex-col items-center justify-center gap-2 text-zinc-500">
+                  <Loader2 className="size-5 animate-spin text-zinc-400" />
+                  <p className="text-xs font-sans">{t("app.output.waiting")}</p>
+                </div>
               ) : (
-                <pre className="font-mono text-xs whitespace-pre-wrap wrap-break-word text-foreground">
-                  {t("app.output.waiting")}
-                </pre>
+                <div className="flex h-full flex-col items-center justify-center gap-1 text-zinc-500">
+                  <p className="text-xs font-sans">{t("app.output.waiting")}</p>
+                </div>
               )}
             </div>
           </AppModal.Body>
-          <AppModal.Footer className="px-3 pb-3">
-            <Button size="sm" variant="tertiary" onClick={actions.closeLogModal}>
+          <AppModal.Footer>
+            <Button size="sm" variant="outline" onClick={actions.closeLogModal}>
               {t("app.actions.close")}
             </Button>
           </AppModal.Footer>

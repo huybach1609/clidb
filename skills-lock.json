@@ -91,6 +91,12 @@
       "sourceType": "github",
       "computedHash": "46bd078eef99d07cf5544129e24f917646a39cda58672233c559d3fa6af68369"
     },
+    "shadcn": {
+      "source": "shadcn/ui",
+      "sourceType": "github",
+      "skillPath": "skills/shadcn/SKILL.md",
+      "computedHash": "c1a68ee06a668aced9ab2b5fbdea5f989864123794eb2e056b339a072dbb7f10"
+    },
     "shape": {
       "source": "pbakaus/impeccable",
       "sourceType": "github",

@@ -1,0 +1,93 @@
+{
+  "app": {
+    "title": "Lệnh",
+    "emptyCommands": "Không có lệnh nào",
+    "actions": {
+      "create": "Tạo",
+      "update": "Cập nhật",
+      "close": "Đóng",
+      "cancel": "Hủy",
+      "execute": "Chạy",
+      "running": "Đang chạy",
+      "edit": "Sửa",
+      "delete": "Xóa"
+    },
+    "about": {
+      "title": "Giới thiệu",
+      "productName": "clidb",
+      "versionLabel": "Phiên bản {{version}}",
+      "blurb": "Thư viện lệnh CLI trên máy tính của bạn.",
+      "github": "GitHub",
+      "altLogo": "Biểu tượng ứng dụng"
+    },
+    "preferences": {
+      "languageMenu": "Ngôn ngữ",
+      "languageEnglish": "English",
+      "languageVietnamese": "Tiếng Việt",
+      "useLightTheme": "Chuyển giao diện sáng",
+      "useDarkTheme": "Chuyển giao diện tối"
+    },
+    "list": {
+      "openActionsFor": "Mở hành động cho {{name}}",
+      "progressAriaLabel": "Đang chạy lệnh {{name}}"
+    },
+    "output": {
+      "title": "Kết quả lệnh",
+      "status": {
+        "running": "Đang chạy...",
+        "failed": "Thất bại",
+        "finished": "Hoàn tất"
+      },
+      "stderrLines": "Số dòng stderr: {{count}}",
+      "exitCode": " | mã thoát: {{code}}",
+      "waiting": "Đang chờ output..."
+    },
+    "form": {
+      "title": {
+        "create": "Tạo lệnh",
+        "update": "Cập nhật lệnh"
+      },
+      "sections": {
+        "advanced": "Nâng cao"
+      },
+      "fields": {
+        "name": "Tên",
+        "command": "Lệnh",
+        "requiresRoot": "Cần quyền root",
+        "envs": "Biến môi trường"
+      },
+      "placeholders": {
+        "name": "Tên lệnh",
+        "command": "Lệnh",
+        "envs": "KEY=VALUE\nVí dụ:\nAPP_MODE=dev\nAPI_URL=https://example.com"
+      },
+      "helpers": {
+        "name": "Nhãn ngắn để nhận diện lệnh trong danh sách.",
+        "command": "Nhập chính xác lệnh shell bạn muốn chạy.",
+        "envs": "Mỗi dòng một biến, định dạng KEY=VALUE."
+      },
+      "validation": {
+        "nameRequired": "Tên là bắt buộc.",
+        "commandRequired": "Lệnh là bắt buộc.",
+        "fixHighlighted": "Vui lòng sửa các trường đang báo lỗi.",
+        "envLineInvalid": "Dòng env {{line}} không hợp lệ. Dùng định dạng KEY=VALUE.",
+        "envKeyInvalid": "Tên biến môi trường không hợp lệ ở dòng {{line}}: {{key}}",
+        "envRestricted": "Không được phép ghi đè biến hệ thống: {{key}}"
+      }
+    }
+  },
+  "errors": {
+    "unknown": "Đã xảy ra lỗi.",
+    "saveCli": {
+      "appDataDir": "Không lấy được thư mục dữ liệu ứng dụng.",
+      "createDir": "Không tạo được thư mục lưu trữ.",
+      "readFile": "Không đọc được file dữ liệu.",
+      "deserialize": "Không phân tích được file dữ liệu.",
+      "serialize": "Không chuẩn bị được dữ liệu để lưu.",
+      "writeFile": "Không ghi được file dữ liệu.",
+      "commandNotFound": "Không tìm thấy lệnh.",
+      "executeCommand": "Không thể thực thi lệnh.",
+      "restrictedEnv": "Không được ghi đè các biến môi trường hệ thống được bảo vệ."
+    }
+  }
+}

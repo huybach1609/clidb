@@ -1,7 +1,9 @@
 
-import { ScrollShadow } from "@heroui/react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
+import { X } from "lucide-react";
 import {
   createContext,
   use,
@@ -11,7 +13,6 @@ import {
   type Ref,
 } from "react";
 import { createPortal } from "react-dom";
-
 
 type AppModalContextValue = {
   titleId: string;
@@ -79,8 +80,6 @@ function AppModalRoot({
     };
   }, [isOpen, onClose, onWindowKeyDown]);
 
-
-
   return createPortal(
     <AnimatePresence>
       {isOpen && (
@@ -125,7 +124,7 @@ function AppModalBackdrop({ className }: AppModalBackdropProps) {
     <div
       aria-hidden
       className={clsx(
-        "absolute inset-0",
+        "absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity",
         closeOnBackdropClick && "cursor-pointer",
         className,
       )}
@@ -146,7 +145,7 @@ function AppModalPanel({ className, children, ref }: AppModalPanelProps) {
       ref={ref}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       className={clsx(
-        "relative z-1 flex w-full max-h-[min(90vh,44rem)] flex-col overflow-hidden rounded-(--radius-outline) outline-none",
+        "relative z-1 flex w-full max-h-[min(90vh,44rem)] flex-col overflow-hidden rounded-2xl border border-border/80 bg-card text-card-foreground shadow-2xl outline-none",
         className,
       )}
       exit={{ opacity: 0, scale: 0.98, y: 10 }}
@@ -158,6 +157,39 @@ function AppModalPanel({ className, children, ref }: AppModalPanelProps) {
   );
 }
 
+type AppModalHeaderProps = {
+  children?: ReactNode;
+  className?: string;
+  onClose?: () => void;
+};
+
+function AppModalHeader({ children, className, onClose }: AppModalHeaderProps) {
+  const context = use(AppModalContext);
+  const handleClose = onClose ?? context?.onClose;
+
+  return (
+    <div
+      className={clsx(
+        "flex items-center justify-between gap-3 px-5 py-4 border-b border-border/60",
+        className,
+      )}
+    >
+      <div className="min-w-0 flex-1">{children}</div>
+      {handleClose ? (
+        <Button
+          size="icon-sm"
+          variant="ghost"
+          onClick={handleClose}
+          className="size-7 text-muted-foreground hover:text-foreground shrink-0 rounded-lg"
+          aria-label="Close"
+        >
+          <X className="size-4" />
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
 type AppModalBodyProps = {
   className?: string;
   children?: ReactNode;
@@ -165,9 +197,9 @@ type AppModalBodyProps = {
 
 function AppModalBody({ className, children }: AppModalBodyProps) {
   return (
-    <ScrollShadow className={clsx("min-h-0 flex-1 overflow-y-auto", className)}>
+    <ScrollArea className={clsx("min-h-0 flex-1 overflow-y-auto", className)}>
       {children}
-    </ScrollShadow>
+    </ScrollArea>
   );
 }
 
@@ -180,7 +212,7 @@ function AppModalFooter({ className, children }: AppModalFooterProps) {
   return (
     <div
       className={clsx(
-        "pt-3 flex items-center justify-end gap-2 border-t border-default-200 ",
+        "px-5 py-3.5 flex items-center justify-end gap-2.5 border-t border-border/60 bg-muted/20",
         className,
       )}
     >
@@ -198,7 +230,7 @@ function AppModalTitle({ children, className }: AppModalTitleProps) {
   const { titleId } = useAppModalContext();
 
   return (
-    <h2 className={clsx("sr-only", className)} id={titleId}>
+    <h2 className={clsx("font-semibold text-base tracking-tight text-foreground", className)} id={titleId}>
       {children}
     </h2>
   );
@@ -208,6 +240,7 @@ export const AppModal = {
   Root: AppModalRoot,
   Backdrop: AppModalBackdrop,
   Panel: AppModalPanel,
+  Header: AppModalHeader,
   Body: AppModalBody,
   Footer: AppModalFooter,
   Title: AppModalTitle,

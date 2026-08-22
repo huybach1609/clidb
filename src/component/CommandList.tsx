@@ -1,6 +1,15 @@
 import { memo, useCallback } from "react";
-import { Button, Dropdown, Label, ProgressBar, ScrollShadow } from "@heroui/react";
-import { PencilRuler, Play, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { PencilRuler, Play, ShieldAlert, Trash2, Terminal } from "lucide-react";
 import type { CliCommand } from "@/lib/cli";
 import { useTranslation } from "react-i18next";
 
@@ -30,8 +39,8 @@ const CommandRow = memo(function CommandRow({
   );
 
   const handleAction = useCallback(
-    async (key: string | number) => {
-      await onAction(String(key) as CommandAction, command);
+    async (action: CommandAction) => {
+      await onAction(action, command);
     },
     [command, onAction],
   );
@@ -43,32 +52,53 @@ const CommandRow = memo(function CommandRow({
     [command, onAction],
   );
 
-  const rowSurfaceClass = `rounded-(--radius) border bg-surface-secondary ${
-    isRunning ? "border-accent/70 bg-accent/10" : "border-transparent"
-  }`;
+  const hasEnvs = Object.keys(command.envs ?? {}).length > 0;
+
+  const cardBorderClass = isRunning
+    ? "border-emerald-500/60 bg-emerald-500/5 dark:bg-emerald-950/20"
+    : "border-border/80 bg-card hover:border-primary/40 hover:shadow-xs";
 
   const commandBody = (
-    <div className="min-w-0 flex-1 space-y-1 text-left">
-      <div className="flex items-center justify-between gap-2">
-        <div className="font-bold text-sm leading-5 wrap-break-word">{command.name}</div>
-        {isRunning ? (
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-accent">
-            {t("app.output.status.running")}
+    <div className="min-w-0 flex-1 space-y-2 text-left">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-semibold text-sm tracking-tight text-foreground wrap-break-word">
+            {command.name}
           </span>
+          {command.requires_root ? (
+            <Badge variant="destructive" className="gap-1 px-1.5 py-0 text-[10px] uppercase">
+              <ShieldAlert className="size-3" />
+              Sudo
+            </Badge>
+          ) : null}
+          {hasEnvs ? (
+            <Badge variant="outline" className="px-1.5 py-0 text-[10px] text-muted-foreground border-border/80">
+              Env
+            </Badge>
+          ) : null}
+        </div>
+        {isRunning ? (
+          <Badge variant="default" className="bg-emerald-600 dark:bg-emerald-500 text-white gap-1.5 px-2 py-0.5 text-[10px] uppercase font-semibold animate-pulse">
+            <span className="size-1.5 rounded-full bg-white animate-ping" />
+            {t("app.output.status.running")}
+          </Badge>
         ) : null}
       </div>
-      <div className="text-xs leading-4 opacity-70 break-all">{command.command}</div>
+
+      {/* Styled Terminal Code Block */}
+      <div className="group/code flex items-start gap-2 rounded-lg border border-border/50 bg-muted/60 dark:bg-zinc-950/60 px-3 py-2 font-mono text-xs text-foreground/90 transition-colors">
+        <Terminal className="size-3.5 shrink-0 text-muted-foreground mt-0.5" />
+        <span className="select-all break-all leading-relaxed flex-1">
+          {command.command}
+        </span>
+      </div>
+
       {isRunning ? (
-        <ProgressBar
+        <Progress
           aria-label={t("app.list.progressAriaLabel", { name: command.name })}
-          isIndeterminate
-          size="sm"
-          color="accent"
-        >
-          <ProgressBar.Track>
-            <ProgressBar.Fill />
-          </ProgressBar.Track>
-        </ProgressBar>
+          className="h-1 mt-1 animate-pulse"
+          value={null}
+        />
       ) : null}
     </div>
   );
@@ -76,80 +106,85 @@ const CommandRow = memo(function CommandRow({
   return (
     <div className="p-0">
       <div
-        className={`flex w-full min-h-20 items-stretch ${rowSurfaceClass}`}
-        style={{ opacity: isBusy ? 0.5 : 1 }}
+        className={`flex w-full min-h-20 items-stretch rounded-xl border p-3.5 sm:p-4 transition-all duration-200 ${cardBorderClass}`}
+        style={{ opacity: isBusy ? 0.6 : 1 }}
       >
         {/* Narrow viewports: full-row opens action menu */}
         <div className="min-w-0 flex-1 lg:hidden">
-          <Dropdown isOpen={isOpen} onOpenChange={handleOpenChange}>
-            <Dropdown.Trigger className="h-auto w-full min-h-20 justify-start rounded-(--radius) hover:bg-surface-tertiary">
-              <div
-                className="flex h-full w-full flex-col px-3 py-2.5 text-left"
-                aria-label={t("app.list.openActionsFor", { name: command.name })}
-              >
+          <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
+            <DropdownMenuTrigger
+              render={
+                <button
+                  type="button"
+                  className="h-auto w-full min-h-20 justify-start rounded-lg p-0 text-left outline-none cursor-pointer"
+                  aria-label={t("app.list.openActionsFor", { name: command.name })}
+                />
+              }
+            >
+              <div className="flex h-full w-full flex-col text-left">
                 {commandBody}
               </div>
-            </Dropdown.Trigger>
-            <Dropdown.Popover className="rounded-(--radius-outline)">
-              <Dropdown.Menu onAction={handleAction}>
-                <Dropdown.Item id="execute" key="execute" isDisabled={isRunning}>
-                  <Play className="size-4 shrink-0 text-success" />
-                  <Label className="text-success">
-                    {isRunning ? t("app.actions.running") : t("app.actions.execute")}
-                  </Label>
-                </Dropdown.Item>
-                <Dropdown.Item id="edit" key="edit">
-                  <PencilRuler className="size-4 shrink-0 text-muted" />
-                  <Label>{t("app.actions.edit")}</Label>
-                </Dropdown.Item>
-                <Dropdown.Item id="delete" key="delete">
-                  <Trash2 className="size-4 shrink-0 text-danger" />
-                  <Label className="text-danger">{t("app.actions.delete")}</Label>
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown.Popover>
-          </Dropdown>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-36">
+              <DropdownMenuItem
+                disabled={isRunning}
+                onClick={() => handleAction("execute")}
+                className="text-emerald-600 dark:text-emerald-400 font-medium"
+              >
+                <Play className="size-4 shrink-0 mr-2 text-emerald-600 dark:text-emerald-400" />
+                {isRunning ? t("app.actions.running") : t("app.actions.execute")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAction("edit")}>
+                <PencilRuler className="size-4 shrink-0 mr-2 text-muted-foreground" />
+                {t("app.actions.edit")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleAction("delete")}
+                className="text-destructive focus:text-destructive font-medium"
+              >
+                <Trash2 className="size-4 shrink-0 mr-2 text-destructive" />
+                {t("app.actions.delete")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Wide desktop: text + icon actions on the right */}
-        <div className="hidden min-w-0 flex-1 flex-col justify-center px-3 py-2.5 lg:flex">
+        <div className="hidden min-w-0 flex-1 flex-col justify-center lg:flex">
           {commandBody}
         </div>
-        <div className="hidden shrink-0 items-center gap-1 border-l border-default-200/60 py-2 pr-2 pl-1 lg:flex">
+        <div className="hidden shrink-0 items-center gap-1.5 border-l border-border/40 pl-3 ml-3 lg:flex">
           <Button
-            size="sm"
-            variant="tertiary"
-            isIconOnly
-            isDisabled={isBusy || isRunning}
+            size="icon"
+            variant="ghost"
+            disabled={isBusy || isRunning}
             aria-label={
               isRunning ? t("app.actions.running") : t("app.actions.execute")
             }
-            onPress={() => runDesktopAction("execute")}
-            className="min-h-10 min-w-10"
+            onClick={() => runDesktopAction("execute")}
+            className="size-9 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
           >
-            <Play className="size-4 text-success" />
+            <Play className="size-4" />
           </Button>
           <Button
-            size="sm"
-            variant="tertiary"
-            isIconOnly
-            isDisabled={isBusy}
+            size="icon"
+            variant="ghost"
+            disabled={isBusy}
             aria-label={t("app.actions.edit")}
-            onPress={() => runDesktopAction("edit")}
-            className="min-h-10 min-w-10"
+            onClick={() => runDesktopAction("edit")}
+            className="size-9 text-muted-foreground hover:bg-muted hover:text-foreground"
           >
-            <PencilRuler className="size-4 text-muted" />
+            <PencilRuler className="size-4" />
           </Button>
           <Button
-            size="sm"
-            variant="tertiary"
-            isIconOnly
-            isDisabled={isBusy}
+            size="icon"
+            variant="ghost"
+            disabled={isBusy}
             aria-label={t("app.actions.delete")}
-            onPress={() => runDesktopAction("delete")}
-            className="min-h-10 min-w-10"
+            onClick={() => runDesktopAction("delete")}
+            className="size-9 text-destructive/80 hover:bg-destructive/10 hover:text-destructive"
           >
-            <Trash2 className="size-4 text-danger" />
+            <Trash2 className="size-4" />
           </Button>
         </div>
       </div>
@@ -175,18 +210,20 @@ export const CommandList = memo(function CommandList({
   onAction,
 }: CommandListProps) {
   return (
-    <ScrollShadow className="flex min-h-0 w-full flex-1 flex-col gap-2 overflow-y-auto rounded-(--radius-outline) rounded-medium border border-default-200 p-3 sm:p-4">
-      {commands.map((command) => (
-        <CommandRow
-          key={command.id}
-          command={command}
-          isOpen={openDropdownId === command.id}
-          isBusy={busyCommandIds.has(command.id)}
-          isRunning={runningCommandIds.has(command.id)}
-          onOpenChange={onOpenChange}
-          onAction={onAction}
-        />
-      ))}
-    </ScrollShadow>
+    <ScrollArea className="flex min-h-0 w-full flex-1 flex-col rounded-2xl border border-border/70 bg-background/50 p-3 sm:p-4">
+      <div className="flex flex-col gap-3">
+        {commands.map((command) => (
+          <CommandRow
+            key={command.id}
+            command={command}
+            isOpen={openDropdownId === command.id}
+            isBusy={busyCommandIds.has(command.id)}
+            isRunning={runningCommandIds.has(command.id)}
+            onOpenChange={onOpenChange}
+            onAction={onAction}
+          />
+        ))}
+      </div>
+    </ScrollArea>
   );
 });

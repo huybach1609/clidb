@@ -149,11 +149,11 @@ pub fn setup_native_menu(app: &mut App<Wry>) -> tauri::Result<()> {
         false,
         Some("CmdOrCtrl+Shift+D"),
     )?;
-    app.manage(DarkModeMenuState {
-        item: dark_mode.clone(),
-    });
-    let menu = build_native_menu(&handle, &dark_mode)?;
-    handle.set_menu(menu)?;
+    #[cfg(target_os = "macos")]
+    {
+        let menu = build_native_menu(&handle, &dark_mode)?;
+        handle.set_menu(menu)?;
+    }
     Ok(())
 }
 

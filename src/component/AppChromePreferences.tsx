@@ -1,5 +1,11 @@
 import { memo, useCallback } from "react";
-import { Button, Dropdown, Label } from "@heroui/react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Languages, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useLanguagePreference } from "@/hooks/useLanguagePreference";
@@ -24,8 +30,8 @@ export const AppChromePreferences = memo(function AppChromePreferences({
   const { language, setLanguage } = useLanguagePreference();
 
   const handleLangAction = useCallback(
-    (key: string | number) => {
-      const id = String(key) as AppLanguage;
+    (key: string) => {
+      const id = key as AppLanguage;
       if (id === "en" || id === "vi") setLanguage(id);
     },
     [setLanguage],
@@ -38,45 +44,42 @@ export const AppChromePreferences = memo(function AppChromePreferences({
   const isDark = theme === "dark";
 
   return (
-    <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-      <Dropdown>
-        <Button
-          size="sm"
-          variant="tertiary"
-          isIconOnly
-          className="min-h-10 min-w-10"
-          aria-label={t("app.preferences.languageMenu")}
+    <div className="flex shrink-0 items-center gap-0.5">
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              aria-label={t("app.preferences.languageMenu")}
+            />
+          }
         >
           <Languages className="size-4" />
-        </Button>
-        <Dropdown.Popover className="rounded-(--radius-outline)">
-          <Dropdown.Menu
-            aria-label={t("app.preferences.languageMenu")}
-            onAction={handleLangAction}
-          >
-            {LANG_ITEMS.map((item) => (
-              <Dropdown.Item key={item.id} id={item.id}>
-                <Label
-                  className={
-                    language === item.id ? "font-medium text-accent" : undefined
-                  }
-                >
-                  {t(item.labelKey)}
-                </Label>
-              </Dropdown.Item>
-            ))}
-          </Dropdown.Menu>
-        </Dropdown.Popover>
-      </Dropdown>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {LANG_ITEMS.map((item) => (
+            <DropdownMenuItem
+              key={item.id}
+              onClick={() => handleLangAction(item.id)}
+              className={
+                language === item.id ? "font-medium text-primary" : undefined
+              }
+            >
+              {t(item.labelKey)}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <Button
-        size="sm"
-        variant="tertiary"
-        isIconOnly
-        className="min-h-10 min-w-10"
+        size="icon-sm"
+        variant="ghost"
+        className="size-8 text-muted-foreground hover:text-foreground"
         aria-label={isDark ? t("app.preferences.useLightTheme") : t("app.preferences.useDarkTheme")}
         aria-pressed={isDark}
-        onPress={cycleTheme}
+        onClick={cycleTheme}
       >
         {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
       </Button>

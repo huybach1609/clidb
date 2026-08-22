@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function () {
+        var k = "clidb-theme";
+        var t = null;
+        try {
+          t = localStorage.getItem(k);
+        } catch (e) {}
+        if (t !== "light" && t !== "dark") {
+          t = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+        document.documentElement.setAttribute("data-theme", t);
+        document.documentElement.classList.toggle("dark", t === "dark");
+      })();
+    </script>
+    <script>
+      (function () {
+        try {
+          var v = localStorage.getItem("clidb-lang:v1");
+          if (v === "en" || v === "vi") {
+            document.documentElement.lang = v;
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri + React + Typescript</title>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

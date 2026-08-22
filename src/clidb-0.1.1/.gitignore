@@ -1,0 +1,59 @@
+# Dependencies
+node_modules
+
+# Build output (Vite)
+dist
+dist-ssr
+
+# Bun
+.bun
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+lerna-debug.log*
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Local overrides
+*.local
+
+# TypeScript
+*.tsbuildinfo
+
+# Test & coverage
+coverage
+*.lcov
+
+# Caches & tooling
+.cache
+.eslintcache
+.parcel-cache
+.turbo
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+
+.agents
