@@ -1,6 +1,6 @@
 # Maintainer: huybach1609 <huybach1609@gmail.com>
 pkgname=clidb
-pkgver=0.1.1
+pkgver=0.1.2
 pkgrel=1
 pkgdesc="A sleek desktop CLI command manager built with Tauri v2 and React"
 arch=('x86_64' 'aarch64')
