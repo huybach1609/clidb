@@ -210,7 +210,7 @@ export const CommandList = memo(function CommandList({
   onAction,
 }: CommandListProps) {
   return (
-    <ScrollArea className="flex min-h-0 w-full flex-1 flex-col rounded-2xl border border-border/70 bg-background/50 p-3 sm:p-4">
+    <ScrollArea className="flex min-h-0 w-full flex-1 flex-col p-1 sm:p-2">
       <div className="flex flex-col gap-3">
         {commands.map((command) => (
           <CommandRow

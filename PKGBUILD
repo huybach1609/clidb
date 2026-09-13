@@ -21,7 +21,7 @@ makedepends=(
 )
 options=('!lto')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('821e6d01cb7fbbbe070f403753166bfde664f107d7925af14aa9639ae0de089c')
+sha256sums=('13e3f91177703649c85f9b633f3ffdf28e38180bb83f404bdd2217d9604d3383')
 
 build() {
   cd "$pkgname-$pkgver"

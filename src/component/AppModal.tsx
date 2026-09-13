@@ -89,7 +89,7 @@ function AppModalRoot({
           aria-labelledby={titleId}
           aria-modal="true"
           className={clsx(
-            "fixed inset-0 z-100 flex items-end justify-center p-4 sm:items-center",
+            "fixed top-10 inset-x-0 bottom-0 z-100 flex items-end justify-center p-4 sm:items-center",
             className,
           )}
           exit={{ opacity: 0 }}

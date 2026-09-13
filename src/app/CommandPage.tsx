@@ -168,9 +168,9 @@ function CommandPageBody() {
   }, []);
 
   return (
-    <main className="flex h-svh min-h-0 flex-col bg-background text-foreground select-none">
+    <main className="flex h-svh min-h-0 flex-col bg-background text-foreground select-none rounded-xl overflow-hidden border border-border/50 shadow-2xl">
       {/* Sleek Frameless Titlebar Header */}
-      <header className="flex shrink-0 h-10 items-center justify-between px-3 border-b border-border/50 bg-card/70 backdrop-blur-md select-none">
+      <header className="relative z-10 flex shrink-0 h-10 items-center justify-between px-3 border-b border-border/50 bg-card/70 backdrop-blur-md select-none">
         {/* Left Drag Region: Logo, Title, Badge */}
         <div
           data-tauri-drag-region
@@ -216,7 +216,7 @@ function CommandPageBody() {
       </header>
 
       {/* Main Content Area */}
-      <div className="mx-auto flex min-h-0 w-full max-w-2xl flex-1 flex-col gap-3 px-4 py-4 sm:px-6 lg:max-w-3xl lg:gap-4 lg:py-6">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-3 p-3 sm:p-4 lg:gap-4 lg:p-5">
         {state.errorMessage ? (
           <p className="shrink-0 text-destructive text-sm font-medium" role="alert">
             {state.errorMessage}
