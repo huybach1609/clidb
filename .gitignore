@@ -62,3 +62,16 @@ Desktop.ini
 .github
 
 .vscode
+
+# Arch Linux / makepkg artifacts
+pkg/
+*.pkg.tar.*
+*.tar.gz
+*.tar.xz
+*.tar.zst
+*.deb
+.SRCINFO
+src/clidb-*/
+src/*.tar.*
+packaging/**/src/
+packaging/**/pkg/

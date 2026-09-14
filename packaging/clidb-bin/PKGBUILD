@@ -1,0 +1,26 @@
+# Maintainer: huybach1609 <huybach1609@gmail.com>
+pkgname=clidb-bin
+pkgver=0.1.3
+pkgrel=1
+pkgdesc="A sleek desktop CLI command manager built with Tauri v2 and React (precompiled binary)"
+arch=('x86_64')
+url="https://github.com/huybach1609/clidb"
+license=('MIT')
+
+provides=('clidb')
+conflicts=('clidb')
+
+depends=(
+  'webkit2gtk-4.1'
+  'gtk3'
+  'libsoup3'
+  'openssl'
+  'hicolor-icon-theme'
+)
+
+source_x86_64=("$pkgname-$pkgver.deb::$url/releases/download/v$pkgver/clidb_${pkgver}_amd64.deb")
+sha256sums_x86_64=('95f767198e1b3efaf6d234efe88fe6a0dd60ea5d325a086a8552cae43aee2fe1')
+
+package() {
+  bsdtar -xf data.tar.gz -C "$pkgdir/"
+}
