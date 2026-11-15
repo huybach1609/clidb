@@ -56,6 +56,7 @@ pub fn run() {
             cli_service::create_command,
             cli_service::update_command,
             cli_service::delete_command,
+            cli_service::reorder_commands,
             cli_service::execute_command,
             native_menu::sync_dark_mode_menu
         ])

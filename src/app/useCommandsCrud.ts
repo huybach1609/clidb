@@ -3,6 +3,7 @@ import {
   createCommand,
   deleteCommand,
   readCommands,
+  reorderCommands as persistCommandOrder,
   type CliCommand,
   updateCommand,
 } from "@/lib/cli";
@@ -26,6 +27,7 @@ type UseCommandsCrudActions = {
   setError: (message: string) => void;
   saveCommand: (data: CliCommand) => Promise<void>;
   deleteCommandById: (id: string) => Promise<void>;
+  reorderCommands: (orderedIds: string[]) => Promise<void>;
 };
 
 export function useCommandsCrud(): {
@@ -122,6 +124,27 @@ export function useCommandsCrud(): {
     }
   }, []);
 
+  const reorderCommands = useCallback(
+    async (orderedIds: string[]) => {
+      setErrorMessage(null);
+      // Cập nhật lạc quan: sắp lại ngay theo thứ tự mới, lỗi thì đọc lại từ backend.
+      setCommands((prev) => {
+        const byId = new Map(prev.map((command) => [command.id, command]));
+        return orderedIds
+          .map((id) => byId.get(id))
+          .filter((command): command is CliCommand => command !== undefined);
+      });
+      try {
+        await persistCommandOrder(orderedIds);
+      } catch (e) {
+        console.error("reorder_commands failed", e);
+        await refresh().catch(() => undefined);
+        setErrorMessage(formatIpcError(e));
+      }
+    },
+    [refresh],
+  );
+
   return {
     state: {
       commands,
@@ -140,6 +163,7 @@ export function useCommandsCrud(): {
       setError,
       saveCommand,
       deleteCommandById,
+      reorderCommands,
     },
   };
 }

@@ -29,7 +29,8 @@
     },
     "list": {
       "openActionsFor": "Open actions for {{name}}",
-      "progressAriaLabel": "Running command {{name}}"
+      "progressAriaLabel": "Running command {{name}}",
+      "dragHandle": "Drag to reorder {{name}}"
     },
     "output": {
       "title": "Command output",
@@ -40,7 +41,8 @@
       },
       "stderrLines": "stderr lines: {{count}}",
       "exitCode": " | exit code: {{code}}",
-      "waiting": "Waiting for output..."
+      "waiting": "Waiting for output...",
+      "noOutput": "Command finished with no output"
     },
     "form": {
       "title": {

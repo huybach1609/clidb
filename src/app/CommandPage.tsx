@@ -19,6 +19,7 @@ import { useCommandsCrud } from "@/app/useCommandsCrud";
 import { useCommandExecutionStream } from "@/app/useCommandExecutionStream";
 import { useNativeMenuBridge } from "@/hooks/useNativeMenuBridge";
 import { useTheme } from "@/hooks/useTheme";
+import { useCommandHotkeys } from "@/hooks/useCommandHotkeys";
 import type { CliCommand } from "@/lib/cli";
 
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -112,6 +113,7 @@ export function CommandPage() {
         openCreateModal: crudActions.openCreateModal,
         closeFormModal: crudActions.closeModal,
         saveCommand: crudActions.saveCommand,
+        reorderCommands: crudActions.reorderCommands,
         closeLogModal: streamActions.closeLogModal,
         clearError: crudActions.clearError,
       },
@@ -150,6 +152,26 @@ function CommandPageBody() {
   const { theme, setTheme, toggleTheme } = useTheme();
   const [aboutOpen, setAboutOpen] = useState(false);
   const closeAbout = useCallback(() => setAboutOpen(false), []);
+
+  const hotkeysEnabled =
+    !state.isFormModalOpen && state.activeLogCommand === null && !aboutOpen;
+  const isCommandBlocked = useCallback(
+    (id: string) =>
+      state.busyCommandIds.has(id) || state.runningCommandIds.has(id),
+    [state.busyCommandIds, state.runningCommandIds],
+  );
+  const runFromHotkey = useCallback(
+    (command: CliCommand) => {
+      void actions.onMenuAction("execute", command);
+    },
+    [actions],
+  );
+  const showShortcutHints = useCommandHotkeys({
+    commands: state.commands,
+    enabled: hotkeysEnabled,
+    isCommandBlocked,
+    onRun: runFromHotkey,
+  });
 
   useNativeMenuBridge({
     theme,
@@ -228,8 +250,10 @@ function CommandPageBody() {
             openDropdownId={state.openDropdownId}
             busyCommandIds={state.busyCommandIds}
             runningCommandIds={state.runningCommandIds}
+            showShortcuts={showShortcutHints}
             onOpenChange={actions.onOpenDropdownChange}
             onAction={actions.onMenuAction}
+            onReorder={actions.reorderCommands}
           />
         ) : (
           <p className="text-default-600">{t("app.emptyCommands")}</p>
@@ -313,7 +337,11 @@ function CommandPageBody() {
                 </div>
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-1 text-zinc-500">
-                  <p className="text-xs font-sans">{t("app.output.waiting")}</p>
+                  <p className="text-xs font-sans">
+                    {state.activeLogResult
+                      ? t("app.output.noOutput")
+                      : t("app.output.waiting")}
+                  </p>
                 </div>
               )}
             </div>

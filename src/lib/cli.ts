@@ -25,6 +25,10 @@ export async function updateCommand(command: CliCommand) {
 export async function deleteCommand(id: string) {
   await invoke("delete_command", { id });
 }
+// Reorder
+export async function reorderCommands(ids: string[]) {
+  await invoke("reorder_commands", { ids });
+}
 // Execute
 export async function executeCommand(id: string): Promise<void> {
   await invoke("execute_command", { id });

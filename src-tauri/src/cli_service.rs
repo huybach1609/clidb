@@ -140,6 +140,21 @@ pub fn delete_command(app_handle: AppHandle, id: String) -> Result<(), IpcError>
     write_db(&app_handle, db)
 }
 
+// REORDER: Sắp xếp lại theo danh sách id. Id lạ bị bỏ qua; command không có trong
+// danh sách giữ nguyên thứ tự tương đối và được đưa xuống cuối (tránh mất dữ liệu).
+#[tauri::command]
+pub fn reorder_commands(app_handle: AppHandle, ids: Vec<String>) -> Result<(), IpcError> {
+    let mut remaining = read_db(&app_handle)?;
+    let mut ordered = Vec::with_capacity(remaining.len());
+    for id in &ids {
+        if let Some(pos) = remaining.iter().position(|c| &c.id == id) {
+            ordered.push(remaining.remove(pos));
+        }
+    }
+    ordered.extend(remaining);
+    write_db(&app_handle, ordered)
+}
+
 // #[tauri::command]
 // pub fn execute_command(app_handle: AppHandle, id: String) -> Result<String, IpcError> {
 //     // 1. Lấy command by id

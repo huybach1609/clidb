@@ -30,6 +30,7 @@ export type CommandPageContextValue = {
     openCreateModal: () => void;
     closeFormModal: () => void;
     saveCommand: (command: CliCommand) => Promise<void>;
+    reorderCommands: (orderedIds: string[]) => Promise<void>;
     closeLogModal: () => void;
     clearError: () => void;
   };

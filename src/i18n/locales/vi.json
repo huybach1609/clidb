@@ -29,7 +29,8 @@
     },
     "list": {
       "openActionsFor": "Mở hành động cho {{name}}",
-      "progressAriaLabel": "Đang chạy lệnh {{name}}"
+      "progressAriaLabel": "Đang chạy lệnh {{name}}",
+      "dragHandle": "Kéo để sắp xếp {{name}}"
     },
     "output": {
       "title": "Kết quả lệnh",
@@ -40,7 +41,8 @@
       },
       "stderrLines": "Số dòng stderr: {{count}}",
       "exitCode": " | mã thoát: {{code}}",
-      "waiting": "Đang chờ output..."
+      "waiting": "Đang chờ output...",
+      "noOutput": "Lệnh đã chạy xong, không có output"
     },
     "form": {
       "title": {
