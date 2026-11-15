@@ -1,6 +1,6 @@
 # Maintainer: huybach1609 <huybach1609@gmail.com>
 pkgname=clidb
-pkgver=0.1.3
+pkgver=0.1.4
 pkgrel=1
 pkgdesc="A sleek desktop CLI command manager built with Tauri v2 and React"
 arch=('x86_64' 'aarch64')
@@ -21,7 +21,7 @@ makedepends=(
 )
 options=('!lto')
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('cd7133cf1ca20e256421309a27a3f330e5104469c97740ca30aa4eb098e7255e')
+sha256sums=('ce2788fa8975373144b88915ec43b9873f44979bc95b2c41d597dcce16249b47')
 
 build() {
   cd "$pkgname-$pkgver"
